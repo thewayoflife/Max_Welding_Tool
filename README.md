@@ -12,5 +12,6 @@ The *Weld* doesn't merge objects. It just creates a new *Spline* around the inte
 Plugin gives you some simple settings for editing the shape of the *Spline*.
 
 Here are two examples where the plugin created a (red) *Spline* which represents a *Weld*.
+
 ![Image 1](Practial%20test%201.png)
 ![Image 2](Practial%20test%202.png)
