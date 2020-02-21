@@ -21,7 +21,7 @@ rollout WeldingTool "DKC Welding"
 	spinner ui_thickness "" fieldwidth:55 range:[0,1e6,4.0] type:#worldUnits pos:[115,grA+20]
 	label lb_sides "Side Segments:" pos:[19,grA+40]
 	spinner ui_sides "" fieldwidth:55 range:[3,1e6,8] type:#integer pos:[115,grA+40]
-	label lb_angle "Angle:" pos:[19,grA+60] visible:true
+	label lb_angle "Angle:" pos:[19,grA+60]
 	spinner ui_angle fieldwidth:55 range:[-180.0,180.0,0.0] type:#float pos:[115,grA+60]
 	
 	/* Bead Settings */
@@ -50,19 +50,19 @@ rollout WeldingTool "DKC Welding"
 
 	/* Check if nodes are Geometry or Shape */
 	fn valid_objects nodes =
+	(
+		for n in nodes do
 		(
-			for n in nodes do
+			if superClassOf n != GeometryClass and superClassOf n != Shape do 
 			(
-				if superClassOf n != GeometryClass and superClassOf n != Shape do 
-				(
-					local msg = "Error!\n Invalid object found in selection: " + n.name + "\n"
-					msg += "Objects must be of type Geometry or Shape."
-					messagebox msg
-					return false
-				)
+				local msg = "Error!\nInvalid object found in selection: " + n.name + "\n"
+				msg += "Objects must be of type Geometry or Shape."
+				messagebox msg
+				return false
 			)
-			return true
 		)
+		return true
+	)
 
 	/* Get Poly from snapshot obj */
 	fn get_poly_snapshot obj =
@@ -133,45 +133,11 @@ rollout WeldingTool "DKC Welding"
 
  		return the_weld
 	)
-
-	/* Attach splines */
-	fn attachSplines splines = 
-	(
-		if splines.count <= 1 do return false
-		converttosplineshape splines[1]
-		for i = 2 to splines.count where canconvertto splines[i] SplineShape do
-		(
-			addandweld splines[1] (converttosplineshape splines[i]) -1
-		)
-		splines[1]
-	)
-
-	/* Spline lenght */
-	fn get_curve_length spline =
-	(
-		local total_length = 0
-		for i = 1 to (numSplines spline) do
-		(
-			total_length += curveLength spline i
-		)
-		total_length
-	)
-
-	/* Spline distance */
-	fn get_count_from_spacing spline dist =
-	(
-		local cnt = 0
-		for i = 1 to (numSplines spline) do
-		(
-			cnt += (floor ((curveLength spline i) / dist) as integer) + 1
-		)
-		cnt
-	)
-
+	
 	/* Define weld type values */
 	fn set_weld_type obj =
 	(		
-		local the_map = Cellular size:ui_cellular_size.value spread:ui_cellular_spread.value /*iteration:ui_cellular_iterations.value*/ lowThresh:ui_cellular_threshold_low.value midThresh:ui_cellular_threshold_mid.value highThresh:ui_cellular_threshold_high.value
+		local the_map = Cellular size:ui_cellular_size.value spread:ui_cellular_spread.value lowThresh:ui_cellular_threshold_low.value midThresh:ui_cellular_threshold_mid.value highThresh:ui_cellular_threshold_high.value
 		the_map.coords.coordType = 0 -- Object XYZ
 		addModifier obj (Displace map:the_map strength:ui_displace_strength.value lumCenterEnable:true useMap:true)
 		append new_weld obj
@@ -234,9 +200,9 @@ rollout WeldingTool "DKC Welding"
 	on ui_cellular_threshold_low changed val do set_map_property Cellular #lowThresh val
 	on ui_cellular_threshold_mid changed val do set_map_property Cellular #midThresh val
 	on ui_cellular_threshold_high changed val do set_map_property Cellular #highThresh val
+	
 
-	on WelderTool open do update_ui_controls()
-)
+) -- end of rollout
 
 /* Create dialog */
 createDialog WeldingTool 200 335
